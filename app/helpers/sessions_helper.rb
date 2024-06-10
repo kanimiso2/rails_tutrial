@@ -6,23 +6,6 @@ module SessionsHelper
     # 詳しくは https://techracho.bpsinc.jp/hachi8833/2023_06_02/130443 を参照
     session[:session_token] = user.session_token
   end
-  # def current_user
-  #   if (user_id = session[:user_id])
-  #     user = User.find_by(id: user_id)
-  #     if user && session[:session_token] == user.session_token
-  #       @current_user = user
-  #     end
-  #     # @current_user ||= User.find_by(id: user_id)
-      
-  #   elsif (user_id = cookies.encrypted[:user_id])
-      
-  #     user = User.find_by(id: user_id)
-  #     if user && user.authenticated?(cookies[:remember_token])
-  #       log_in user
-  #       @current_user = user
-  #     end
-  #   end
-  # end
   def current_user
     if (user_id = session[:user_id])
       user = User.find_by(id: user_id)
@@ -38,7 +21,10 @@ module SessionsHelper
       end
     end
   end
-
+  # 渡されたユーザーがカレントユーザーであればtrueを返す
+  def current_user?(user)
+    user && user == current_user
+  end
   # ユーザーがログインしていればtrue、その他ならfalseを返す
   def logged_in?
     !current_user.nil?
@@ -61,5 +47,9 @@ module SessionsHelper
     user.forget
     cookies.delete(:user_id)
     cookies.delete(:remember_token)
+  end
+  # アクセスしようとしたURLを保存する
+  def store_location
+    session[:forwarding_url] = request.original_url if request.get?
   end
 end
